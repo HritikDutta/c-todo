@@ -12,6 +12,21 @@
 #define DICTIONARY_IMPL
 #include "containers/dictionary.h"
 
+const char todo_help_string[] =
+"usage: todo <command> <args>\n"
+"\n"
+"List of commands used in c-todo:\n"
+"\n"
+"read commands\n"
+"   show    Show todos (all or with given index/tag)\n"
+"   find    Find todo with index or tag\n"
+"\n"
+"write commands\n"
+"   add     Add todo and tags\n"
+"   remove  Remove todo with given index/tag\n"
+"   edit    Edit todo with given index\n"
+;
+
 // #define DEBUG
 
 #ifdef DEBUG
@@ -28,8 +43,11 @@ int main()
 #else
 int main(int argc, char* argv[])
 {
-    if (argc < 2)
-        return 1;
+    if (argc < 2 || string_cmp(argv[1], "help"))
+    {
+        printf(todo_help_string);
+        return 0;
+    }
 #endif
     // All the cleanup will be handled by the OS
 
