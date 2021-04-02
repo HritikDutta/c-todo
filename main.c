@@ -78,6 +78,7 @@ int main(int argc, char* argv[])
                 printf("%d. %s", i + 1, data.todos[i].task);
                 if (show_tags)
                 {
+                    printf(" :");
                     da_foreach(String, tag, data.todos[i].tags)
                         printf(" %s", *tag);
                 }
@@ -101,6 +102,7 @@ int main(int argc, char* argv[])
                     printf("%d. %s", *it + 1, data.todos[*it].task);
                     if (show_tags)
                     {
+                        printf(" :");
                         da_foreach(String, tag, data.todos[*it].tags)
                             printf(" %s", *tag);
                     }
@@ -119,6 +121,7 @@ int main(int argc, char* argv[])
                 printf("%d. %s", index, data.todos[index - 1].task);
                 if (show_tags)
                 {
+                    printf(" :");
                     da_foreach(String, tag, data.todos[index - 1].tags)
                         printf(" %s", *tag);
                 }
