@@ -59,7 +59,10 @@ int main(int argc, char* argv[])
 
     if (string_cmp(argv[1], "show"))
     {
-        if (argc == 2 || string_cmp(argv[2], "all"))
+        int show_tags = string_cmp(argv[2], "--with-tags");
+        int subcmd_idx = show_tags ? 3 : 2;
+
+        if (argc == subcmd_idx || string_cmp(argv[subcmd_idx], "all"))
         {
             int size = da_size(data.todos);
 
@@ -70,32 +73,55 @@ int main(int argc, char* argv[])
             }
 
             for (int i = 0; i < size; i++)
-                printf("%d. %s\n", i + 1, data.todos[i].task);
+            {
+                printf("%d. %s", i + 1, data.todos[i].task);
+                if (show_tags)
+                {
+                    da_foreach(String, tag, data.todos[i].tags)
+                        printf(" %s", *tag);
+                }
+
+                printf("\n");
+            }
         }
         else
         {
-            if (argv[2][0] == '#')
+            if (argv[subcmd_idx][0] == '#')
             {
-                Dict_Bkt(DArray(int)) bkt = dict_find(data.tag_dict, argv[2]);
+                Dict_Bkt(DArray(int)) bkt = dict_find(data.tag_dict, argv[subcmd_idx]);
                 if (bkt == dict_end(data.tag_dict))
                 {
-                    printf("%s tag not found\n", argv[2]);
+                    printf("%s tag not found\n", argv[subcmd_idx]);
                     return 1;
                 }
 
                 da_foreach(int, it, bkt->value)
-                    printf("%d. %s\n", *it + 1, data.todos[*it].task);
+                {
+                    printf("%d. %s", *it + 1, data.todos[*it].task);
+                    if (show_tags)
+                    {
+                        da_foreach(String, tag, data.todos[*it].tags)
+                            printf(" %s", *tag);
+                    }
+                    printf("\n");
+                }
             }
             else
             {
-                int index = atoi(argv[2]);
+                int index = atoi(argv[subcmd_idx]);
                 if (index <= 0 || index > da_size(data.todos))
                 {
                     printf("There are only %zd todos\n", da_size(data.todos));
                     return 1;
                 }
 
-                printf("%d. %s\n", index, data.todos[index - 1].task);
+                printf("%d. %s", index, data.todos[index - 1].task);
+                if (show_tags)
+                {
+                    da_foreach(String, tag, data.todos[index - 1].tags)
+                        printf(" %s", *tag);
+                }
+                printf("\n");
             }
         }
 
