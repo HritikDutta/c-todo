@@ -20,6 +20,7 @@ const char todo_help_string[] =
 "read commands\n"
 "   show    Show todos (all or with given index/tag)\n"
 "   find    Find todo with index or tag\n"
+"   tags    List all tags\n"
 "\n"
 "write commands\n"
 "   add     Add todo and tags\n"
@@ -266,6 +267,24 @@ int main(int argc, char* argv[])
         write_file(filepath, new_content);
 
         printf("Todo updated\n");
+
+        return 0;
+    }
+
+    if (string_cmp(argv[1], "tags"))
+    {
+        int tag_count = 0;
+        dict_foreach(DArray(int), bkt, data.tag_dict)
+        {
+            if (bkt->key)
+            {
+                printf("%s (%zd)\n", bkt->key, da_size(bkt->value));
+                tag_count++;
+            }
+        }
+
+        char* new_line = (tag_count > 0) ? "\n" : "";
+        printf("%sFound %d tag(s)\n", new_line, tag_count);
 
         return 0;
     }
