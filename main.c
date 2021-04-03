@@ -13,7 +13,8 @@
 #include "containers/dictionary.h"
 
 const char todo_help_string[] =
-"usage: todo <command> <args>\n"
+"A todo-system for the command line.\n"
+"   usage: todo <command> <args>\n"
 "\n"
 "List of commands used in c-todo:\n"
 "\n"
