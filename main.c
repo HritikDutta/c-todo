@@ -14,7 +14,7 @@
 
 const char todo_help_string[] =
 "A todo-system for the command line.\n"
-"   usage: todo <command> <args>\n"
+"   usage: %s <command> <args>\n"
 "\n"
 "List of commands used in c-todo:\n"
 "\n"
@@ -47,7 +47,7 @@ int main(int argc, char* argv[])
 {
     if (argc < 2 || string_cmp(argv[1], "help"))
     {
-        printf(todo_help_string);
+        printf(todo_help_string, argv[0]);
         return 0;
     }
 #endif
