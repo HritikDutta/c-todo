@@ -65,22 +65,22 @@
 
 #define da_foreach(type, it, arr)    for (DA_Itr(type) it = (DA_Itr(type))da_begin(arr); it != (DA_Itr(type))da_end(arr); it++)
 
-void da_make_impl(void** arr, size_t cap, size_t type_size);
-void da_copy_impl(void** dest, void* src, size_t type_size);
-void da_move_impl(void** dest, void** src, size_t type_size);
+void da_make_impl(void** arr, int cap, int type_size);
+void da_copy_impl(void** dest, void* src, int type_size);
+void da_move_impl(void** dest, void** src, int type_size);
 void da_free_impl(void** arr);
 
-void da_resize_impl(void** arr, size_t new_cap, size_t type_size);
+void da_resize_impl(void** arr, int new_cap, int type_size);
 
-DA_Itr(void) da_get_itr_impl(void* arr, size_t index, size_t type_size);
+DA_Itr(void) da_get_itr_impl(void* arr, int index, int type_size);
 
-size_t da_size_impl(void* arr);
-size_t da_cap_impl(void* arr);
+int da_size_impl(void* arr);
+int da_cap_impl(void* arr);
 
 typedef struct
 {
-    size_t cap;
-    size_t size;
+    int cap;
+    int size;
     char buffer[];
 } DA_Internal;
 
@@ -90,7 +90,7 @@ typedef struct
     do {                                                            \
         hd_assert(arr != NULL);                                     \
         DA_Internal* da = da_data(arr);                             \
-        size_t size = da->size, cap = da->cap;                      \
+        int size = da->size, cap = da->cap;                      \
                                                                     \
         if (cap == 0)    da_resize(arr, DARRAY_START_CAP);          \
         if (size >= cap) da_resize(arr, DARRAY_GROWTH_RATE * cap);  \
@@ -102,7 +102,7 @@ typedef struct
     do {                                    \
         hd_assert(arr != NULL);             \
         DA_Internal* da = da_data(arr);     \
-        size_t size = da->size;             \
+        int size = da->size;             \
                                             \
         if (size > 0) da->size--;           \
     } while(0)
@@ -111,7 +111,7 @@ typedef struct
     do {                                                                \
         hd_assert(arr != NULL);                                         \
         DA_Internal* da = da_data(arr);                                 \
-        size_t size = da->size, cap = da->cap;                          \
+        int size = da->size, cap = da->cap;                          \
                                                                         \
         if (cap == 0)        da_resize(arr, DARRAY_START_CAP);          \
         if (size + 1 >= cap) da_resize(arr, DARRAY_GROWTH_RATE * cap);  \
@@ -127,7 +127,7 @@ typedef struct
     do {                                        \
         hd_assert(arr != NULL);                 \
         DA_Internal* da = da_data(arr);         \
-        size_t size = da->size;                 \
+        int size = da->size;                 \
         hd_assert(size > 0 && index < size);    \
                                                 \
         for (int i = index; i < size - 1; i++)  \
@@ -140,7 +140,7 @@ typedef struct
     do {                                        \
         hd_assert(arr != NULL);                 \
         DA_Internal* da = da_data(arr);         \
-        size_t size = da->size;                 \
+        int size = da->size;                 \
         hd_assert(size > 0 && index < size);    \
                                                 \
         arr[index] = arr[size - 1];             \
@@ -166,9 +166,9 @@ typedef struct
 #include <string.h>
 #include "hd_assert.h"
 
-void da_make_impl(void** arr, size_t cap, size_t type_size)
+void da_make_impl(void** arr, int cap, int type_size)
 {
-    size_t byte_size = cap * type_size + sizeof(DA_Internal);
+    int byte_size = cap * type_size + sizeof(DA_Internal);
     DA_Internal* da = (DA_Internal*) malloc(byte_size);
     hd_assert(da != NULL);
 
@@ -178,11 +178,11 @@ void da_make_impl(void** arr, size_t cap, size_t type_size)
     *arr = da->buffer;
 }
 
-void da_copy_impl(void** dest, void* src, size_t type_size)
+void da_copy_impl(void** dest, void* src, int type_size)
 {
     hd_assert(src != NULL);
     DA_Internal* src_da = da_data(src);
-    size_t byte_size = src_da->cap * type_size + sizeof(DA_Internal);
+    int byte_size = src_da->cap * type_size + sizeof(DA_Internal);
     
     DA_Internal* dest_da;
     if (*dest) dest_da = (DA_Internal*) realloc(da_data(*dest), byte_size);
@@ -190,13 +190,13 @@ void da_copy_impl(void** dest, void* src, size_t type_size)
 
     hd_assert(dest_da != NULL);
     
-    size_t filled_byte_size = src_da->size * type_size + sizeof(DA_Internal);
+    int filled_byte_size = src_da->size * type_size + sizeof(DA_Internal);
     memcpy(dest_da, src_da, filled_byte_size);
 
     *dest = dest_da->buffer;
 }
 
-void da_move_impl(void** dest, void** src, size_t type_size)
+void da_move_impl(void** dest, void** src, int type_size)
 {
     hd_assert(*src != NULL);
     DA_Internal* dest_da = da_data(*src);
@@ -214,10 +214,10 @@ void da_free_impl(void** arr)
 }
 
 
-void da_resize_impl(void** arr, size_t new_cap, size_t type_size)
+void da_resize_impl(void** arr, int new_cap, int type_size)
 {
     DA_Internal* da = NULL;
-    size_t size = 0;
+    int size = 0;
     
     if (*arr)
     {
@@ -225,7 +225,7 @@ void da_resize_impl(void** arr, size_t new_cap, size_t type_size)
         size = da->size;
     }
 
-    size_t byte_size = new_cap * type_size + sizeof(DA_Internal);
+    int byte_size = new_cap * type_size + sizeof(DA_Internal);
     DA_Internal* new_da = (DA_Internal*) realloc(da, byte_size);
     
     new_da->size = size;
@@ -234,20 +234,20 @@ void da_resize_impl(void** arr, size_t new_cap, size_t type_size)
     *arr = new_da->buffer;
 }
 
-DA_Itr(void) da_get_itr_impl(void* arr, size_t index, size_t type_size)
+DA_Itr(void) da_get_itr_impl(void* arr, int index, int type_size)
 {
     hd_assert(arr != NULL);
     return (char*)arr + (index * type_size);
 }
 
-inline size_t da_size_impl(void* arr)
+inline int da_size_impl(void* arr)
 {
     if (!arr) return 0;
  
     return da_data(arr)->size;
 }
 
-inline size_t da_cap_impl(void* arr)
+inline int da_cap_impl(void* arr)
 {
     if (!arr) return 0;
  
