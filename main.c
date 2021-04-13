@@ -2,6 +2,8 @@
 
 #include "filestuff/filestuff.h"
 #include "todos/todo.h"
+#include "args/args.h"
+#include "todos/help_strings.h"
 
 #define STRING_IMPL
 #include "containers/string.h"
@@ -45,13 +47,26 @@ int main()
 #else
 int main(int argc, char* argv[])
 {
-    if (argc < 2 || string_cmp(argv[1], "help"))
-    {
-        printf(todo_help_string, argv[0]);
-        return 0;
-    }
 #endif
     // All the cleanup will be handled by the OS
+
+    CL_Args args = parse_command_line_args(argc, argv);
+
+    if (args.error)
+        return 1;
+
+    if (args.command == COMMAND_NONE)
+    {
+        printf(help_strings[COMMAND_NONE], argv[0], argv[0], argv[0]);
+        free_cl_args(&args);
+        return 0;
+    }
+
+    if (args.show_help)
+    {
+        printf(help_strings[args.command], argv[0]);
+        return 0;
+    }
 
     String filepath = "C:/todos/todo-data.txt";
     String contents = load_file(filepath);
@@ -59,240 +74,281 @@ int main(int argc, char* argv[])
     File_Data data = todos_file_make();
     todos_file_load(contents, &data);
 
-    if (string_cmp(argv[1], "show"))
+    switch (args.command)
     {
-        int show_tags = string_cmp(argv[2], "--with-tags");
-        int subcmd_idx = show_tags ? 3 : 2;
-
-        if (argc == subcmd_idx || string_cmp(argv[subcmd_idx], "all"))
+        case COMMAND_SHOW:
         {
-            int size = da_size(data.todos);
-
-            if (size == 0)
+            int num_options = da_size(args.options);
+            if (num_options == 0 || string_cmp(args.options[0], "*"))
             {
-                printf("No todos found\n");
-                return 1;
-            }
+                int size = da_size(data.todos);
 
-            for (int i = 0; i < size; i++)
-            {
-                printf("%d. %s", i + 1, data.todos[i].task);
-                if (show_tags)
+                if (size == 0)
                 {
-                    printf(" :");
-                    da_foreach(String, tag, data.todos[i].tags)
-                        printf(" %s", *tag);
-                }
-
-                printf("\n");
-            }
-        }
-        else
-        {
-            if (argv[subcmd_idx][0] == '#')
-            {
-                Dict_Bkt(DArray(int)) bkt = dict_find(data.tag_dict, argv[subcmd_idx]);
-                if (bkt == dict_end(data.tag_dict))
-                {
-                    printf("%s tag not found\n", argv[subcmd_idx]);
+                    printf("No todos found\n");
                     return 1;
                 }
 
-                da_foreach(int, it, bkt->value)
+                for (int i = 0; i < size; i++)
                 {
-                    printf("%d. %s", *it + 1, data.todos[*it].task);
-                    if (show_tags)
+                    printf("%d. %s", i + 1, data.todos[i].task);
+                    if (args.show_tags)
                     {
                         printf(" :");
-                        da_foreach(String, tag, data.todos[*it].tags)
+                        da_foreach(String, tag, data.todos[i].tags)
                             printf(" %s", *tag);
                     }
+
                     printf("\n");
                 }
             }
             else
             {
-                int index = atoi(argv[subcmd_idx]);
-                if (index <= 0 || index > da_size(data.todos))
+                int num_todos = da_size(data.todos);
+                unsigned char* to_be_displayed = calloc(num_todos, sizeof(unsigned char));
+
+                da_foreach(String, option, args.options)
                 {
-                    printf("There are only %zd todos\n", da_size(data.todos));
-                    return 1;
+                    if ((*option)[0] == '#')
+                    {
+                        Dict_Bkt(DArray(int)) bkt = dict_find(data.tag_dict, (*option));
+                        if (bkt == dict_end(data.tag_dict))
+                        {
+                            printf("%s tag not found\n", (*option));
+                            return 1;
+                        }
+
+                        da_foreach(int, it, bkt->value)
+                            to_be_displayed[*it] = 1;
+                    }
+                    else
+                    {
+                        int index = atoi(*option);
+
+                        // Not a valid number
+                        if (index == 0)
+                        {
+                            printf("Expected a tag or a number, got: '%s'\n", *option);
+                            continue;
+                        }
+
+                        if (index > da_size(data.todos))
+                        {
+                            printf("%d is an invalid index\n", index);
+                            continue;
+                        }
+
+                        to_be_displayed[index - 1] = 1;
+                    }
                 }
 
-                printf("%d. %s", index, data.todos[index - 1].task);
-                if (show_tags)
+                for (int i = 0; i < num_todos; i++)
                 {
-                    printf(" :");
-                    da_foreach(String, tag, data.todos[index - 1].tags)
-                        printf(" %s", *tag);
+                    if (to_be_displayed[i])
+                    {
+                        printf("%d. %s", i + 1, data.todos[i].task);
+                        if (args.show_tags)
+                        {
+                            printf(" :");
+                            da_foreach(String, tag, data.todos[i].tags)
+                                printf(" %s", *tag);
+                        }
+                        printf("\n");
+                    }
                 }
-                printf("\n");
+
+                free(to_be_displayed);
             }
-        }
+        } break;
 
-        return 0;
-    }
-
-    if (string_cmp(argv[1], "find"))
-    {
-        if (argc < 3)
+        case COMMAND_FIND:
         {
-            printf("No term provided to find\n");
-            return 1;
-        }
-        
-        int size = da_size(data.todos);
-        int count = 0;
-        for (int i = 0; i < size; i++)
-        {
-            char* found = strstr(data.todos[i].task, argv[2]);
-            if (found)
+            int num_options = da_size(args.options);
+            if (num_options == 0)
             {
-                printf("%d. %s\n", i + 1, data.todos[i].task);
-                count++;
-            }
-        }
-
-        char s = (count == 1) ? '\0' : 's';
-        printf("Found %d todo%c\n", count, s);
-    
-        return 0;
-    }
-
-    if (string_cmp(argv[1], "add"))
-    {
-        if (argc < 3)
-        {
-            printf("No task provided to add\n");
-            return 1;
-        }
-        // @Todo: Check if task provided is empty
-
-        Todo todo = todo_make(string_make(argv[2]));
-        for (int i = 3; i < argc; i++)
-        {
-            // @Todo: Tags should start with '#'
-            da_push_back(todo.tags, string_make(argv[i]));
-        }
-
-        todos_add_todo(&data, todo);
-        String new_content = todos_generate_content(data);
-        write_file(filepath, new_content);
-
-        printf("Added todo: %s", todo.task);
-
-        return 0;
-    }
-
-    if (string_cmp(argv[1], "remove"))
-    {
-        if (argc < 3)
-        {
-            printf("Provide index of todo to be removed\n");
-            return 1;
-        }
-
-        if (string_cmp(argv[2], "all"))
-        {
-            // No need to free each todo
-            // @Todo: No need to parse the file at all
-            write_file(filepath, "");
-            return 0;
-        }
-
-        if (argv[2][0] == '#')
-        {
-            // Remove by tag
-            Dict_Bkt(DArray(int)) bkt = dict_find(data.tag_dict, argv[2]);
-            if (bkt == dict_end(data.tag_dict))
-            {
-                printf("Tag not found: %s\n", argv[2]);
+                printf("No term provided to find\n");
                 return 1;
+            }
+
+            int num_todos = da_size(data.todos);
+            int count = 0;
+            for (int i = 0; i < num_todos; i++)
+            {
+                da_foreach(String, search_string, args.options)
+                {
+                    char* found = strstr(data.todos[i].task, (*search_string));
+                    if (found)
+                    {
+                        printf("%d. %s\n", i + 1, data.todos[i].task);
+                        count++;
+                        break;
+                    }
+                }
+            }
+
+            char s = (count == 1) ? '\0' : 's';
+            printf("Found %d todo%c\n", count, s);
+        } break;
+
+        case COMMAND_TAGS:
+        {
+            dict_foreach(DArray(int), bkt, data.tag_dict)
+            {
+                if (bkt->key)
+                    printf("%s (%d)\n", bkt->key, da_size(bkt->value));
+            }
+
+            int num_tags = dict_filled(data.tag_dict);
+            char* new_line = (num_tags > 0) ? "\n" : "";
+            printf("%sFound %d tag(s)\n", new_line, num_tags);
+        } break;
+
+        case COMMAND_ADD:
+        {
+            int num_options = da_size(args.options);
+            if (num_options == 0)
+            {
+                printf("No task provided to add\n");
+                return 1;
+            }
+
+            Todo todo = todo_make(string_make(args.options[0]));
+            for (int i = 1; i < num_options; i++)
+            {
+                // Ignore invalid tags
+                if (args.options[i][0] != '#')
+                    continue;
+
+                da_push_back(todo.tags, string_make(args.options[i]));
+            }
+
+            todos_add_todo(&data, todo);
+            String new_content = todos_generate_content(data);
+            write_file(filepath, new_content);
+
+            printf("Added todo: %s", todo.task);
+        } break;
+
+        case COMMAND_REMOVE:
+        {
+            int num_options = da_size(args.options);
+            if (num_options == 0)
+            {
+                printf("Provide index of todo or tags to be removed\n");
+                return 1;
+            }
+
+            if (string_cmp(args.options[0], "*"))
+            {
+                write_file(filepath, "");
+                return 0;
+            }
+
+            int num_todos = da_size(data.todos);
+            unsigned char* mark_for_removing = calloc(num_todos, sizeof(unsigned char));
+
+            da_foreach(String, option, args.options)
+            {
+                if ((*option)[0] == '#')
+                {
+                    // Remove by tag
+                    Dict_Bkt(DArray(int)) bkt = dict_find(data.tag_dict, (*option));
+                    if (bkt == dict_end(data.tag_dict))
+                    {
+                        printf("Tag not found: %s\n", *option);
+                        continue;
+                    }
+
+                    for (int i = da_size(bkt->value) - 1; i >= 0; i--)
+                    {
+                        int index = bkt->value[i];
+                        mark_for_removing[index] = 1;
+                    }
+                }
+                else
+                {
+                    // Remove by index
+                    int index = atoi(*option);
+
+                    // Not a valid number
+                    if (index == 0)
+                    {
+                        printf("Expected a tag or a number, got: '%s'\n", *option);
+                        continue;
+                    }
+
+                    if (index > da_size(data.todos))
+                    {
+                        printf("%d is an invalid index\n", index);
+                        continue;
+                    }
+
+                    mark_for_removing[index - 1] = 1;
+                }
+            }
+
+            // Displaying names in proper order
+            for (int i = 0; i < num_todos; i++)
+            {
+                if (mark_for_removing[i])
+                    printf("Removed todo: %s\n", data.todos[i].task);
             }
 
             // Deleting in reverse order since the other way
             // round can cause errors due to change in order in todos array
-            for (int i = da_size(bkt->value) - 1; i >= 0; i--)
+            for (int index = num_todos - 1; index >= 0; index--)
             {
-                int index = bkt->value[i];
-                Todo todo = data.todos[index];
-                da_erase_at(data.todos, (index));
-                printf("Removed todo: %s\n", todo.task);
+                if (mark_for_removing[index])
+                    da_erase_at(data.todos, index);
             }
-        }
-        else
+
+            free(mark_for_removing);
+
+            String new_content = todos_generate_content(data);
+            write_file(filepath, new_content);
+        } break;
+
+        case COMMAND_EDIT:
         {
-            // Remove by index
-            int index = atoi(argv[2]);
-            if (index <= 0 || index > da_size(data.todos))
+            int num_options = da_size(args.options);
+            if (num_options == 0)
             {
-                printf("There are only %zd todos\n", da_size(data.todos));
+                printf("Expected index of todo to be edited\n");
                 return 1;
             }
 
-            Todo todo = data.todos[index - 1];
-            da_erase_at(data.todos, (index - 1));
-            printf("Removed todo: %s\n", todo.task);
-        }
+            int index = atoi(args.options[0]);
 
-        String new_content = todos_generate_content(data);
-        write_file(filepath, new_content);
-
-        return 0;
-    }
-
-    if (string_cmp(argv[1], "edit"))
-    {
-        if (argc < 4)
-        {
-            printf("Expected index of todo to be edited\n");
-            return 1;
-        }
-
-        int index = atoi(argv[2]);
-        if (index <= 0 || index > da_size(data.todos))
-        {
-            printf("There are only %zd todos\n", da_size(data.todos));
-            return 1;
-        }
-
-        Todo prev_todo = data.todos[index - 1];
-        Todo new_todo = todo_make(string_make(argv[3]));
-
-        for (int i = 4; i < argc; i++)
-        {
-            // @Todo: Tags should start with '#'
-            da_push_back(new_todo.tags, string_make(argv[i]));
-        }
-
-        data.todos[index - 1] = new_todo;
-
-        String new_content = todos_generate_content(data);
-        write_file(filepath, new_content);
-
-        printf("Todo updated\n");
-
-        return 0;
-    }
-
-    if (string_cmp(argv[1], "tags"))
-    {
-        int tag_count = 0;
-        dict_foreach(DArray(int), bkt, data.tag_dict)
-        {
-            if (bkt->key)
+            // Not a valid number
+            if (index == 0)
             {
-                printf("%s (%zd)\n", bkt->key, da_size(bkt->value));
-                tag_count++;
+                printf("Expected a tag or a number, got: '%s'\n", args.options[0]);
+                return 1;
             }
-        }
 
-        char* new_line = (tag_count > 0) ? "\n" : "";
-        printf("%sFound %d tag(s)\n", new_line, tag_count);
+            if (index > da_size(data.todos))
+            {
+                printf("%d is an invalid index\n", index);
+                return 1;
+            }
 
-        return 0;
+            Todo new_todo = todo_make(args.options[1]);
+
+            for (int i = 2; i < num_options; i++)
+            {
+                // Ignore invalid tags
+                if (args.options[i][0] != '#')
+                    continue;
+
+                da_push_back(new_todo.tags, string_make(args.options[i]));
+            }
+
+            data.todos[index - 1] = new_todo;
+
+            String new_content = todos_generate_content(data);
+            write_file(filepath, new_content);
+
+            printf("Todo updated\n");
+        } break;
     }
-
-    printf("Command not recognized\n");
-    return 1;
 }
