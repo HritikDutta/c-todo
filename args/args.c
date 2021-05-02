@@ -17,16 +17,23 @@ CL_Args parse_command_line_args(int argc, char* argv[])
     int found_commmand = 0;
     for (int i = 1; i < argc; i++)
     {
-        if (string_cmp(argv[i], "-with-tags"))
+        if (argv[i][0] == '-')
         {
-            args.show_tags = 1;
-            continue;
-        }
+            if (string_cmp(argv[i], "-with-tags"))
+            {
+                args.show_tags = 1;
+                continue;
+            }
 
-        if (string_cmp(argv[i], "-help"))
-        {
-            args.show_help = 1;
-            continue;
+            if (string_cmp(argv[i], "-help"))
+            {
+                args.show_help = 1;
+                continue;
+            }
+
+            printf("Flag '%s' not recognized\n", argv[i]);
+            args.error = 1;
+            break;
         }
 
         if (!found_commmand)
