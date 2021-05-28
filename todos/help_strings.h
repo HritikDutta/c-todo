@@ -26,21 +26,21 @@ const char* help_strings[] = {
 
 // SHOW
 "Show todos (all or with given index/tag).\n"
-"   usage: %s show [-show-tags] [<index>...] [<tag>...]\n"
+"   usage: %s show [-with-tags] [<index>...] [<tag>...]\n"
 "\n"
 "options\n"
 "   <index>...  Indices of todos to be shown (* displays all indices)\n"
 "   <tag>...    All todos with these tags will be shown\n"
-"   -show-tags  Show tags linked with displayed todos\n"
+"   -with-tags  Show tags linked with displayed todos\n"
 ,
 
 // FIND
 "Find for todos that contain given subtring.\n"
-"   usage: %s find [-show-tags] <arg>\n"
+"   usage: %s find [-with-tags] <arg>\n"
 "\n"
 "options\n"
 "   <arg>       Substring to search in all todos\n"
-"   -show-tags  Show tags linked with displayed todos\n"
+"   -with-tags  Show tags linked with displayed todos\n"
 ,
 
 // TAGS
