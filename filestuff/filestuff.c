@@ -36,3 +36,8 @@ int write_file(const String filepath, String contents)
     fclose(file);
     return 1;
 }
+
+int remove_file(const String filepath)
+{
+    return remove(filepath) == 0;
+}
