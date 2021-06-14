@@ -14,36 +14,17 @@
 #define DICTIONARY_IMPL
 #include "containers/dictionary.h"
 
-const char todo_help_string[] =
-"A todo-system for the command line.\n"
-"   usage: %s <command> <args>\n"
-"\n"
-"List of commands used in c-todo:\n"
-"\n"
-"read commands\n"
-"   show    Show todos (all or with given index/tag)\n"
-"   find    Find todo with index or tag\n"
-"   tags    List all tags\n"
-"\n"
-"write commands\n"
-"   add     Add todo and tags\n"
-"   remove  Remove todo with given index/tag\n"
-"   edit    Edit todo with given index\n"
-;
-
 // #define DEBUG
 
 #ifdef DEBUG
 int main()
 {
     char* argv[] = {
-        "todo",
-        "add",
-        "A new task!",
-        "#test",
-        "#new"
+        "todo-test",
+        "-local",
+        "init",
     };
-    int argc = 5;
+    int argc = 3;
 #else
 int main(int argc, char* argv[])
 {
@@ -57,7 +38,7 @@ int main(int argc, char* argv[])
 
     if (args.command == COMMAND_NONE)
     {
-        printf(help_strings[COMMAND_NONE], argv[0], argv[0], argv[0]);
+        printf(help_strings[COMMAND_NONE], argv[0], argv[0], argv[0], argv[0], argv[0]);
         free_cl_args(&args);
         return 0;
     }
@@ -68,8 +49,19 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    String filepath = "C:/todos/todo-data.txt";
+    String filepath = (args.scope == SCOPE_LOCAL) ? "todo-list.txt" : "C:/todos/todo-list.txt";
     String contents = load_file(filepath);
+
+    if (contents == NULL && args.command != COMMAND_INIT)
+    {
+        printf(
+            "No todo list associated with this directory.\n"
+            "To initialize a todo list in this directory, call:\n"
+            "    %s init\n", argv[0]
+        );
+
+        return 1;
+    }
 
     File_Data data = todos_file_make();
     todos_file_load(contents, &data);
@@ -349,6 +341,25 @@ int main(int argc, char* argv[])
             write_file(filepath, new_content);
 
             printf("Todo updated\n");
+        } break;
+
+        case COMMAND_INIT:
+        {
+            // Create an empty list file locally
+            write_file("todo-list.txt", "");
+            printf("Todo list initilazed for current directory\n");
+        } break;
+
+        case COMMAND_DELETE:
+        {
+            // Delete local list file
+            if (!remove_file("todo-list.txt"))
+            {
+                printf("Couldn't delete todo-list.txt in current directory\n");
+                return 1;
+            }
+
+            printf("Deleted todo list for current directory\n");
         } break;
     }
 }
