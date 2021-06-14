@@ -39,6 +39,9 @@ static void consume_ws(String string, int* index)
 
 void todos_file_load(String contents, File_Data* data)
 {
+    if (contents == NULL)
+        return;
+
     int curr_index = 0;
     for (int i = 0; contents[i]; i++)
     {
