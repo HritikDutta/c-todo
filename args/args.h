@@ -12,7 +12,16 @@ typedef enum
     COMMAND_ADD,
     COMMAND_REMOVE,
     COMMAND_EDIT,
+    COMMAND_INIT,
+    COMMAND_DELETE,
 } Command_Code;
+
+typedef enum
+{
+    SCOPE_DEFAULT,
+    SCOPE_GLOBAL,
+    SCOPE_LOCAL,
+} Scope;
 
 typedef struct
 {
@@ -21,6 +30,7 @@ typedef struct
     DArray(String) options;
     int show_tags;
     int show_help;
+    Scope scope;
 } CL_Args;
 
 CL_Args parse_command_line_args(int argc, char* argv[]);

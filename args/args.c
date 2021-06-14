@@ -19,15 +19,35 @@ CL_Args parse_command_line_args(int argc, char* argv[])
     {
         if (argv[i][0] == '-')
         {
+            if (string_cmp(argv[i], "-help"))
+            {
+                args.show_help = 1;
+                continue;
+            }
+
+            if (string_cmp(argv[i], "-local"))
+            {
+                if (args.scope != SCOPE_DEFAULT)
+                {
+                    printf("Trying to set scope twice\n");
+                    args.error = 1;
+                    break;
+                }
+
+                args.scope = SCOPE_LOCAL;
+                continue;
+            }
+            
             if (string_cmp(argv[i], "-with-tags"))
             {
                 args.show_tags = 1;
                 continue;
             }
 
-            if (string_cmp(argv[i], "-help"))
+            // Just in case anyone wants to be explicit
+            if (string_cmp(argv[i], "-global"))
             {
-                args.show_help = 1;
+                args.scope = SCOPE_GLOBAL;
                 continue;
             }
 
@@ -76,6 +96,20 @@ CL_Args parse_command_line_args(int argc, char* argv[])
             if (string_cmp(argv[i], "edit"))
             {
                 args.command = COMMAND_EDIT;
+                found_commmand = 1;
+                continue;
+            }
+
+            if (string_cmp(argv[i], "init"))
+            {
+                args.command = COMMAND_INIT;
+                found_commmand = 1;
+                continue;
+            }
+
+            if (string_cmp(argv[i], "delete"))
+            {
+                args.command = COMMAND_DELETE;
                 found_commmand = 1;
                 continue;
             }
