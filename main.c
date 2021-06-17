@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    String filepath = (args.scope == SCOPE_LOCAL) ? "todo-list.txt" : "C:/todos/todo-list.txt";
+    String filepath = (args.scope == SCOPE_LOCAL) ? ".todos" : "C:/todos/.todos";
     String contents = load_file(filepath);
 
     if (contents == NULL && args.command != COMMAND_INIT)
