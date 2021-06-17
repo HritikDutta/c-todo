@@ -2,7 +2,7 @@
 
 set outdir=C:\todos\
 
-if not exist %outdir%todo-data.txt type nul > %outdir%todo-data.txt
+if not exist %outdir%.todos type nul > %outdir%.todos
 
 cl /c filestuff\*.c /I .
 cl /c todos\*.c /I .
