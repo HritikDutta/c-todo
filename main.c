@@ -346,14 +346,14 @@ int main(int argc, char* argv[])
         case COMMAND_INIT:
         {
             // Create an empty list file locally
-            write_file("todo-list.txt", "");
+            write_file(".todos", "");
             printf("Todo list initilazed for current directory\n");
         } break;
 
         case COMMAND_DELETE:
         {
             // Delete local list file
-            if (!remove_file("todo-list.txt"))
+            if (!remove_file(".todos"))
             {
                 printf("Couldn't delete todo-list.txt in current directory\n");
                 return 1;
