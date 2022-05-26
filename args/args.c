@@ -25,16 +25,17 @@ CL_Args parse_command_line_args(int argc, char* argv[])
                 continue;
             }
 
+            // Just in case anyone wants to be explicit
+            // By default, the scope is local
             if (string_cmp(argv[i], "-local"))
             {
-                if (args.scope != SCOPE_DEFAULT)
+                if (args.scope != SCOPE_LOCAL)
                 {
                     printf("Trying to set scope twice\n");
                     args.error = 1;
                     break;
                 }
 
-                args.scope = SCOPE_LOCAL;
                 continue;
             }
             
@@ -44,7 +45,6 @@ CL_Args parse_command_line_args(int argc, char* argv[])
                 continue;
             }
 
-            // Just in case anyone wants to be explicit
             if (string_cmp(argv[i], "-global"))
             {
                 args.scope = SCOPE_GLOBAL;

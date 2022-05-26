@@ -18,9 +18,8 @@ typedef enum
 
 typedef enum
 {
-    SCOPE_DEFAULT,
-    SCOPE_GLOBAL,
     SCOPE_LOCAL,
+    SCOPE_GLOBAL,
 } Scope;
 
 typedef struct
