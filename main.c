@@ -21,10 +21,9 @@ int main()
 {
     char* argv[] = {
         "todo-test",
-        "-local",
-        "init",
+        "show",
     };
-    int argc = 3;
+    int argc = sizeof(argv) / sizeof(char*);
 #else
 int main(int argc, char* argv[])
 {
@@ -49,7 +48,7 @@ int main(int argc, char* argv[])
         return 0;
     }
 
-    String filepath = (args.scope == SCOPE_LOCAL) ? ".todos" : "C:/todos/.todos";
+    String filepath = (args.scope == SCOPE_LOCAL) ? ".todos" : "C:/hd-tools/.todos";
     String contents = load_file(filepath);
 
     if (contents == NULL && args.command != COMMAND_INIT)
