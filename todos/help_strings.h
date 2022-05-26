@@ -31,6 +31,8 @@ const char* help_strings[] = {
 "along with the command. Like below:\n"
 "\n"
 "    $ %s show -local OR $ %s -global show\n"
+"\n"
+"By default the scope is always local.\n"
 ,
 
 // SHOW
