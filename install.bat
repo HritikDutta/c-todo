@@ -1,6 +1,6 @@
 @echo off
 
-set outdir=C:\todos\
+set outdir=C:\hd-tools\
 
 if not exist %outdir%.todos type nul > %outdir%.todos
 
