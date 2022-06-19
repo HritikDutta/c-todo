@@ -27,12 +27,10 @@ const char* help_strings[] = {
 "\n"
 "    $ %s show -help OR $ %s -help show\n"
 "\n"
-"To set the scope of the command to local or global, use -local or -global\n"
-"along with the command. Like below:\n"
+"By default the scope is considered local. To manually set the scope of the command\n"
+"to local or global, use -local or -global along with the command. Like below:\n"
 "\n"
 "    $ %s show -local OR $ %s -global show\n"
-"\n"
-"By default the scope is always local.\n"
 ,
 
 // SHOW
