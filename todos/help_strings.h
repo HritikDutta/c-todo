@@ -39,7 +39,7 @@ const char* help_strings[] = {
 "\n"
 "options\n"
 "    <index>...  Indices of todos to be shown (* displays all indices)\n"
-"    <tag>...    All todos with these tags will be shown\n"
+"    <tag>...    All todos with these tags will be shown (tags start with an '#' and contain no whitespaces)\n"
 "    -with-tags  Show tags linked with displayed todos\n"
 ,
 
@@ -65,7 +65,7 @@ const char* help_strings[] = {
 "\n"
 "options\n"
 "    <task>   Task for new todo\n"
-"    <tag>... Tags associated with new todo\n"
+"    <tag>... Tags associated with new todo (tags start with an '#' and contain no whitespaces)\n"
 ,
 
 // REMOVE
@@ -74,7 +74,7 @@ const char* help_strings[] = {
 "\n"
 "options\n"
 "    <index>... Indices of todos to be removed (* removes all indices)\n"
-"    <tag>...   All todos with these tags will be removed\n"
+"    <tag>...   All todos with these tags will be removed (tags start with an '#' and contain no whitespaces)\n"
 ,
 
 // EDIT
@@ -84,7 +84,7 @@ const char* help_strings[] = {
 "options\n"
 "    <index>  Index of todo to be edited\n"
 "    <task>   New task for todo\n"
-"    <tag>... New tags associated with selected todo\n"
+"    <tag>... New tags associated with selected todo (tags start with an '#' and contain no whitespaces)\n"
 ,
 
 // INIT
