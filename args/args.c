@@ -100,6 +100,13 @@ CL_Args parse_command_line_args(int argc, char* argv[])
                 continue;
             }
 
+            if (string_cmp(argv[i], "move"))
+            {
+                args.command = COMMAND_MOVE;
+                found_commmand = 1;
+                continue;
+            }
+
             if (string_cmp(argv[i], "init"))
             {
                 args.command = COMMAND_INIT;

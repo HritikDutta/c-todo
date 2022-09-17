@@ -6,12 +6,19 @@
 typedef enum
 {
     COMMAND_NONE,
+
+    // Read Commands
     COMMAND_SHOW,
     COMMAND_FIND,
     COMMAND_TAGS,
+
+    // Write Commands
     COMMAND_ADD,
     COMMAND_REMOVE,
     COMMAND_EDIT,
+    COMMAND_MOVE,
+
+    // Local Commands
     COMMAND_INIT,
     COMMAND_DELETE,
 } Command_Code;

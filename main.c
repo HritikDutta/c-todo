@@ -341,6 +341,71 @@ int main(int argc, char* argv[])
 
             printf("Todo updated\n");
         } break;
+        
+        case COMMAND_MOVE:
+        {
+            int num_options = da_size(args.options);
+            if (num_options == 0)
+            {
+                printf("Source and destination index not provided\n");
+                return 1;
+            }
+            else if (num_options == 1)
+            {
+                printf("Destination index not provided\n");
+                return 1;
+            }
+
+            int num_todos = da_size(data.todos);
+
+            int src_idx = atoi(args.options[0]);
+            {
+                // Not a valid number
+                if (src_idx == 0)
+                {
+                    printf("Expected a source index, got: '%s'\n", args.options[0]);
+                    return 1;
+                }
+
+                if (src_idx > num_todos)
+                {
+                    printf("%d is an invalid source index\n", src_idx);
+                    return 1;
+                }
+            }
+
+            int dst_idx = atoi(args.options[1]);
+            {
+                // Not a valid number
+                if (dst_idx == 0)
+                {
+                    printf("Expected a destination index, got: '%s'\n", args.options[1]);
+                    return 1;
+                }
+
+                if (dst_idx > num_todos)
+                {
+                    printf("%d is an invalid destination index\n", dst_idx);
+                    return 1;
+                }
+            }
+
+            // No need to move if both indices are the same
+            if (src_idx == dst_idx)
+            {
+                printf("Source and destination indices are equal\n");
+                return 0;
+            }
+
+            Todo todo = data.todos[src_idx - 1];
+            da_insert(data.todos, ((dst_idx < src_idx) ? dst_idx - 1 : dst_idx), todo);
+            da_erase_at(data.todos, ((src_idx < dst_idx) ? src_idx - 1 : src_idx));
+
+            String new_content = todos_generate_content(data);
+            write_file(filepath, new_content);
+
+            printf("Moved todo: %s, from index %d to %d", todo.task, src_idx, dst_idx);
+        } break;
 
         case COMMAND_INIT:
         {

@@ -1,5 +1,7 @@
 #pragma once
 
+// TODO: Add help strings for move command.
+
 const char* help_strings[] = {
 
 // NONE
@@ -17,6 +19,7 @@ const char* help_strings[] = {
 "    add     Add todo and tags\n"
 "    remove  Remove todo with given index/tag\n"
 "    edit    Edit todo with given index\n"
+"    move    Move todo to another index\n"
 "\n"
 "local commands\n"
 "    init    Initialize a local todo-list for current directory\n"
@@ -44,7 +47,7 @@ const char* help_strings[] = {
 ,
 
 // FIND
-"Find for todos that contain given subtring.\n"
+"Find todos that contain given subtring.\n"
 "    usage: %s find [-with-tags] <arg>\n"
 "\n"
 "options\n"
@@ -85,6 +88,15 @@ const char* help_strings[] = {
 "    <index>  Index of todo to be edited\n"
 "    <task>   New task for todo\n"
 "    <tag>... New tags associated with selected todo (tags start with an '#' and contain no whitespaces)\n"
+,
+
+// MOVE
+"Move a todo from one index to another.\n"
+"    usage: %s move <source-index> <destination-index>\n"
+"\n"
+"options\n"
+"    <source-index>       Index of todo to be moved\n"
+"    <destination-index>  Index to move the todo into\n"
 ,
 
 // INIT
