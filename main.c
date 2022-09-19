@@ -105,7 +105,7 @@ int main(int argc, char* argv[])
                         Dict_Bkt(DArray(int)) bkt = dict_find(data.tag_dict, (*option));
                         if (bkt == dict_end(data.tag_dict))
                         {
-                            printf("%s tag not found\n", (*option));
+                            printf("'%s' tag not found\n", (*option));
                             return 1;
                         }
 
@@ -217,7 +217,7 @@ int main(int argc, char* argv[])
             String new_content = todos_generate_content(data);
             write_file(filepath, new_content);
 
-            printf("Added todo: %s", todo.task);
+            printf("Added todo: '%s'", todo.task);
         } break;
 
         case COMMAND_REMOVE:
@@ -246,7 +246,7 @@ int main(int argc, char* argv[])
                     Dict_Bkt(DArray(int)) bkt = dict_find(data.tag_dict, (*option));
                     if (bkt == dict_end(data.tag_dict))
                     {
-                        printf("Tag not found: %s\n", *option);
+                        printf("Tag not found: '%s'\n", *option);
                         continue;
                     }
 
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
             for (int i = 0; i < num_todos; i++)
             {
                 if (mark_for_removing[i])
-                    printf("Removed todo: %s\n", data.todos[i].task);
+                    printf("Removed todo: '%s'\n", data.todos[i].task);
             }
 
             // Deleting in reverse order since the other way
@@ -404,7 +404,7 @@ int main(int argc, char* argv[])
             String new_content = todos_generate_content(data);
             write_file(filepath, new_content);
 
-            printf("Moved todo: %s, from index %d to %d", todo.task, src_idx, dst_idx);
+            printf("Moved todo: '%s' from index %d to %d", todo.task, src_idx, dst_idx);
         } break;
 
         case COMMAND_INIT:
