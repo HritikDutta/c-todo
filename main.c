@@ -55,11 +55,30 @@ int main(int argc, char* argv[])
     {
         printf(
             "No todo list associated with this directory.\n"
-            "To initialize a todo list in this directory, call:\n"
-            "    %s init\n", argv[0]
+            "Initialize a local todo list in this directory and perform this action? (y/n):"
         );
 
-        return 1;
+        while (1)
+        {
+            char input;
+            scanf(" %c", &input);
+            
+            if (input == 'N' || input == 'n')
+                return 1;
+
+            if (input == 'Y' || input == 'y')
+            {
+                // Initialize a local todo list
+
+                // This is not required for all write commands: add, remove, edit, and move
+                // but it's a small thing only meant to be done once so meh.
+                write_file(filepath, "");
+                break;
+            }
+
+            // Invalid input
+            printf("Invalid input! Initialize a local todo list? (y/n):");
+        }
     }
 
     File_Data data = todos_file_make();
@@ -217,7 +236,7 @@ int main(int argc, char* argv[])
             String new_content = todos_generate_content(data);
             write_file(filepath, new_content);
 
-            printf("Added todo: '%s'", todo.task);
+            printf("Added todo: '%s'\n", todo.task);
         } break;
 
         case COMMAND_REMOVE:
@@ -404,7 +423,7 @@ int main(int argc, char* argv[])
             String new_content = todos_generate_content(data);
             write_file(filepath, new_content);
 
-            printf("Moved todo: '%s' from index %d to %d", todo.task, src_idx, dst_idx);
+            printf("Moved todo: '%s' from index %d to %d\n", todo.task, src_idx, dst_idx);
         } break;
 
         case COMMAND_INIT:
